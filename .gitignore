@@ -1,0 +1,23 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entorno
+.env
+.env.*
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# PyCharm
+.idea/
+
+# Compilación / paquetes
+*.egg-info/
