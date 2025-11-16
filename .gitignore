@@ -21,3 +21,6 @@ Thumbs.db
 
 # Compilación / paquetes
 *.egg-info/
+# Base de datos local
+pokedex.db
+*.db
