@@ -179,3 +179,28 @@ class TeamRead(SQLModel):
     description: Optional[str]
     created_at: datetime
     members: List[TeamMemberRead]
+
+# --- Schemas para equipos de batalla ---
+
+class TeamBase(SQLModel):
+    name: str
+    description: Optional[str] = None
+
+
+class TeamCreate(TeamBase):
+    # IDs de Pokémon en PokeAPI (1 = Bulbasaur, 25 = Pikachu, etc.)
+    pokemon_ids: List[int]
+
+
+class TeamUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    # Si se envía, se reemplaza toda la composición del equipo
+    pokemon_ids: Optional[List[int]] = None
+
+
+class TeamRead(TeamBase):
+    id: int
+    created_at: datetime
+    # IDs de Pokémon en PokeAPI, ordenados por position (1-6)
+    pokemon_ids: List[int]
