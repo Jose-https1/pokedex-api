@@ -6,151 +6,118 @@ import logging
 from typing import Any, Dict, List, Optional
 
 import httpx
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pokedex_api.pokeapi")
 
 
 class PokeAPIService:
-    """
-    Cliente REST para PokeAPI.
-
-    Expone métodos asíncronos para usar en endpoints FastAPI,
-    y un método síncrono `sync_get_pokemon` para usar desde
-    código síncrono (por ejemplo en el router de Pokédex).
-    """
-
     BASE_URL = "https://pokeapi.co/api/v2"
-    SPRITE_BASE_URL = (
-        "https://raw.githubusercontent.com/PokeAPI/"
-        "sprites/master/sprites/pokemon/other/official-artwork"
-    )
 
-    def __init__(self) -> None:
-        # Cache muy sencilla en memoria (bonus de la práctica)
-        # clave = str(id_or_name).lower()
-        self._pokemon_cache: Dict[str, Dict[str, Any]] = {}
+    async def _get(self, client: httpx.AsyncClient, path: str) -> Dict[str, Any]:
+        """Helper genérico para hacer peticiones a PokeAPI con manejo de errores."""
+        url = f"{self.BASE_URL}{path}"
+        logger.info("PokeAPI GET %s", url)
 
-    # -----------------------------
-    # Helpers internos
-    # -----------------------------
-    @staticmethod
-    def _cache_key(identifier: str | int) -> str:
-        return str(identifier).lower()
-
-    @staticmethod
-    def _extract_id_from_url(url: str) -> int:
-        """
-        En muchas respuestas de PokeAPI viene un campo 'url' con
-        formato .../pokemon/<id>/. De ahí sacamos el id.
-        """
         try:
-            return int(url.rstrip("/").split("/")[-1])
-        except (ValueError, IndexError):
+            resp = await client.get(url, timeout=10.0)
+        except httpx.RequestError as exc:
+            logger.error("Error comunicando con PokeAPI: %s", exc)
             raise HTTPException(
-                status_code=500,
-                detail="Unexpected PokeAPI URL format",
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Error comunicando con PokeAPI",
             )
 
-    @classmethod
-    def _build_sprite_url(cls, pokemon_id: int) -> str:
-        return f"{cls.SPRITE_BASE_URL}/{pokemon_id}.png"
-
-    @classmethod
-    def _transform_pokemon(cls, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        De toda la respuesta de PokeAPI nos quedamos con los campos
-        que nos interesan para la práctica.
-        """
-        pokemon_id = payload["id"]
-        name = payload["name"]
-
-        sprites = payload.get("sprites", {}) or {}
-        sprite = (
-            sprites.get("other", {})
-            .get("official-artwork", {})
-            .get("front_default")
-            or sprites.get("front_default")
-            or cls._build_sprite_url(pokemon_id)
-        )
-
-        types = [t["type"]["name"] for t in payload.get("types", [])]
-
-        stats = [
-            {"name": s["stat"]["name"], "base": s["base_stat"]}
-            for s in payload.get("stats", [])
-        ]
-
-        abilities = [a["ability"]["name"] for a in payload.get("abilities", [])]
-
-        return {
-            "id": pokemon_id,
-            "name": name,
-            "sprite": sprite,
-            "types": types,
-            "stats": stats,
-            "abilities": abilities,
-        }
-
-    @classmethod
-    def _handle_httpx_error(cls, exc: httpx.HTTPError) -> None:
-        """
-        Traducimos errores de httpx a HTTPException de FastAPI.
-        """
-        if isinstance(exc, httpx.HTTPStatusError):
-            status_code = exc.response.status_code
-            if status_code == 404:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Pokemon not found in PokeAPI",
-                )
-            logger.error(
-                "PokeAPI returned status %s for %s",
-                status_code,
-                exc.request.url,
-            )
+        if resp.status_code == 404:
             raise HTTPException(
-                status_code=502,
-                detail="Error calling PokeAPI",
-            )
-        else:
-            # Timeout, problemas de red, etc.
-            logger.error("Network error calling PokeAPI: %r", exc)
-            raise HTTPException(
-                status_code=503,
-                detail="Error connecting to PokeAPI",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Pokémon no encontrado",
             )
 
-    # -----------------------------
-    # Métodos ASÍNCRONOS (para endpoints)
-    # -----------------------------
+        if resp.status_code >= 500:
+            logger.error("Error de PokeAPI %s en %s", resp.status_code, url)
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Error en PokeAPI",
+            )
+
+        return resp.json()
+
+    # ---------- Helpers de transformación ----------
+
+    def _extract_sprite(self, data: Dict[str, Any]) -> Optional[str]:
+        sprites = data.get("sprites", {}) or {}
+        other = sprites.get("other", {}) or {}
+        official = other.get("official-artwork", {}) or {}
+        sprite = official.get("front_default")
+        if sprite:
+            return sprite
+        return sprites.get("front_default")
+
+    def _extract_stats(self, data: Dict[str, Any]) -> Dict[str, int]:
+        return {item["stat"]["name"]: item["base_stat"] for item in data.get("stats", [])}
+
+    def _extract_types(self, data: Dict[str, Any]) -> List[str]:
+        return [t["type"]["name"] for t in data.get("types", [])]
+
+    def _extract_abilities(self, data: Dict[str, Any]) -> List[str]:
+        return [a["ability"]["name"] for a in data.get("abilities", [])]
+
+    def _extract_description(self, species_data: Dict[str, Any]) -> Optional[str]:
+        """
+        Saca un flavor_text de la especie, priorizando español 'es', y si no hay, inglés 'en'.
+        Limpia saltos de línea raros.
+        """
+        entries = species_data.get("flavor_text_entries", []) or []
+
+        def pick(lang: str) -> Optional[str]:
+            for entry in entries:
+                if entry.get("language", {}).get("name") == lang:
+                    text = entry.get("flavor_text", "")
+                    # limpiar saltos de línea y caracteres raros
+                    return text.replace("\n", " ").replace("\f", " ").strip()
+            return None
+
+        desc = pick("es") or pick("en")
+        return desc
+
+    # ---------- Métodos públicos ----------
+
     async def get_pokemon(self, identifier: str | int) -> Dict[str, Any]:
         """
-        Obtiene info completa de un Pokémon (stats, tipos, habilidades...).
-
-        Devuelve un dict simplificado:
-        {id, name, sprite, types, stats, abilities}
+        Devuelve información "básica" de un Pokémon, usada por varios endpoints.
+        Incluye: id, name, sprite, types, stats, abilities.
         """
-        key = self._cache_key(identifier)
-        if key in self._pokemon_cache:
-            return self._pokemon_cache[key]
+        async with httpx.AsyncClient() as client:
+            data = await self._get(client, f"/pokemon/{identifier}")
 
-        url = f"{self.BASE_URL}/pokemon/{identifier}"
+        pokemon = {
+            "id": data["id"],
+            "name": data["name"],
+            "sprite": self._extract_sprite(data),
+            "types": self._extract_types(data),
+            "stats": self._extract_stats(data),
+            "abilities": self._extract_abilities(data),
+        }
+        return pokemon
 
-        logger.info("PokeAPI GET %s", url)
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(url)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            self._handle_httpx_error(exc)
+    async def get_pokemon_with_species(self, identifier: str | int) -> Dict[str, Any]:
+        """
+        Igual que get_pokemon, pero añade descripción de la especie (para el PDF/card).
+        """
+        async with httpx.AsyncClient() as client:
+            data = await self._get(client, f"/pokemon/{identifier}")
+            species_data = await self._get(client, f"/pokemon-species/{data['id']}")
 
-        payload = response.json()
-        pokemon = self._transform_pokemon(payload)
-        self._pokemon_cache[key] = pokemon
-        # también cacheamos por id (por si nos llaman luego con el número)
-        self._pokemon_cache[str(pokemon["id"])] = pokemon
-
+        pokemon = {
+            "id": data["id"],
+            "name": data["name"],
+            "sprite": self._extract_sprite(data),
+            "types": self._extract_types(data),
+            "stats": self._extract_stats(data),
+            "abilities": self._extract_abilities(data),
+            "description": self._extract_description(species_data),
+        }
         return pokemon
 
     async def search_pokemon(
@@ -160,98 +127,68 @@ class PokeAPIService:
         offset: int = 0,
     ) -> Dict[str, Any]:
         """
-        Lista Pokémon con paginación o búsqueda por nombre.
-
-        - Si `name` viene informado, devuelve solo ese Pokémon (si existe)
-          en la misma estructura de siempre.
-        - Si no hay `name`, hace GET /pokemon?limit=&offset= y llena la
-          lista llamando a get_pokemon(name) para tener tipos y sprite.
+        Lista pokémon con paginación, y opcionalmente filtra por nombre (substring).
         """
-        if name:
-            pokemon = await self.get_pokemon(name)
-            return {
-                "count": 1,
-                "limit": 1,
-                "offset": 0,
-                "results": [pokemon],
-            }
+        async with httpx.AsyncClient() as client:
+            data = await self._get(client, f"/pokemon?limit={limit}&offset={offset}")
 
-        url = f"{self.BASE_URL}/pokemon"
-        params = {"limit": limit, "offset": offset}
+        results = []
+        for item in data.get("results", []):
+            poke_name = item["name"]
+            if name and name.lower() not in poke_name.lower():
+                continue
 
-        logger.info("PokeAPI GET %s params=%s", url, params)
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(url, params=params)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            self._handle_httpx_error(exc)
+            # Intentamos sacar ID del URL
+            url: str = item["url"]
+            try:
+                poke_id = int(url.rstrip("/").split("/")[-1])
+            except ValueError:
+                poke_id = None
 
-        data = response.json()
-        results = data.get("results", [])
-        count = data.get("count", len(results))
-
-        # Pedimos info detallada en paralelo para poder devolver types y sprite
-        tasks = [self.get_pokemon(item["name"]) for item in results]
-        detailed = await asyncio.gather(*tasks)
+            results.append(
+                {
+                    "id": poke_id,
+                    "name": poke_name,
+                }
+            )
 
         return {
-            "count": count,
-            "limit": limit,
-            "offset": offset,
-            "results": detailed,
+            "count": len(results),
+            "results": results,
         }
 
     async def get_pokemon_by_type(self, type_name: str) -> List[Dict[str, Any]]:
         """
-        Obtiene todos los Pokémon de un tipo concreto.
-
-        Devuelve una lista de {id, name, sprite, types, ...}
+        Obtiene pokémon por tipo (solo nombre + id).
         """
-        url = f"{self.BASE_URL}/type/{type_name}"
+        async with httpx.AsyncClient() as client:
+            data = await self._get(client, f"/type/{type_name}")
 
-        logger.info("PokeAPI GET %s", url)
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(url)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            self._handle_httpx_error(exc)
+        results: List[Dict[str, Any]] = []
+        for item in data.get("pokemon", []):
+            poke = item.get("pokemon", {})
+            url: str = poke.get("url", "")
+            try:
+                poke_id = int(url.rstrip("/").split("/")[-1])
+            except ValueError:
+                poke_id = None
 
-        data = response.json()
-        pokemon_entries = data.get("pokemon", [])
+            results.append(
+                {
+                    "id": poke_id,
+                    "name": poke.get("name"),
+                }
+            )
 
-        # Cada elemento tiene forma {"pokemon": {"name": "...", "url": "..."}, "slot": ...}
-        tasks = [
-            self.get_pokemon(entry["pokemon"]["name"])
-            for entry in pokemon_entries
-        ]
-        detailed = await asyncio.gather(*tasks)
+        return results
 
-        return detailed
+    # ---- Helper síncrono que usamos desde endpoints "def" (no async) ----
 
-    # -----------------------------
-    # Método SÍNCRONO (usado desde Pokédex)
-    # -----------------------------
     @classmethod
     def sync_get_pokemon(cls, identifier: str | int) -> Dict[str, Any]:
         """
-        Versión síncrona para usar en código que no es async
-        (por ejemplo, en el router de Pokédex).
-
-        Llama a /pokemon/{id_or_name} y devuelve el mismo dict
-        que `get_pokemon`.
+        Versión síncrona pensada para usar en endpoints que no son async,
+        como el POST de la Pokédex.
         """
-        url = f"{cls.BASE_URL}/pokemon/{identifier}"
-
-        logger.info("PokeAPI [sync] GET %s", url)
-        try:
-            with httpx.Client(timeout=10.0) as client:
-                response = client.get(url)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            cls._handle_httpx_error(exc)
-
-        payload = response.json()
-        pokemon = cls._transform_pokemon(payload)
-        return pokemon
+        service = cls()
+        return asyncio.run(service.get_pokemon(identifier))
