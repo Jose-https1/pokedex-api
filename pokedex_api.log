@@ -1,0 +1,521 @@
+2025-11-16 17:21:11,572 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:21:11,572 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("user")
+2025-11-16 17:21:11,572 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 17:21:11,573 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("pokedexentry")
+2025-11-16 17:21:11,573 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 17:21:11,574 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("team")
+2025-11-16 17:21:11,574 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 17:21:11,574 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("teammember")
+2025-11-16 17:21:11,574 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 17:21:11,575 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-11-16 17:21:11,575 - pokedex_api - INFO - Application startup completed
+2025-11-16 17:21:22,805 - pokedex_api - INFO - Request: GET /docs
+2025-11-16 17:21:22,806 - pokedex_api - INFO - Response: GET /docs | status=200 | duration=0.001s
+2025-11-16 17:21:22,938 - pokedex_api - INFO - Request: GET /openapi.json
+2025-11-16 17:21:22,963 - pokedex_api - INFO - Response: GET /openapi.json | status=200 | duration=0.025s
+2025-11-16 17:21:38,058 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:21:38,062 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:21:38,070 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:21:38,071 - sqlalchemy.engine.Engine - INFO - [generated in 0.00041s] ('jose',)
+2025-11-16 17:21:38,084 - pokedex_api - INFO - Login successful | user_id=1 username=jose
+2025-11-16 17:21:38,085 - pokedex_api - INFO - Response: POST /auth/login | status=200 | duration=0.027s
+2025-11-16 17:21:38,086 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:21:59,202 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:21:59,204 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:21:59,205 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:21:59,205 - sqlalchemy.engine.Engine - INFO - [cached since 21.13s ago] ('jose',)
+2025-11-16 17:21:59,218 - pokedex_api - INFO - Login successful | user_id=1 username=jose
+2025-11-16 17:21:59,218 - pokedex_api - INFO - Response: POST /auth/login | status=200 | duration=0.016s
+2025-11-16 17:21:59,219 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:23:45,485 - pokedex_api - INFO - Request: GET /health
+2025-11-16 17:23:45,486 - pokedex_api - INFO - Response: GET /health | status=200 | duration=0.001s
+2025-11-16 17:24:35,501 - pokedex_api - INFO - Request: GET /health
+2025-11-16 17:24:35,502 - pokedex_api - INFO - Response: GET /health | status=200 | duration=0.001s
+2025-11-16 17:26:59,761 - pokedex_api - INFO - Request: POST /auth/register
+2025-11-16 17:26:59,763 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:26:59,764 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ? OR user.email = ?
+2025-11-16 17:26:59,764 - sqlalchemy.engine.Engine - INFO - [generated in 0.00025s] ('jose', 'jose@example.com')
+2025-11-16 17:26:59,765 - pokedex_api - WARNING - Register failed (duplicate) | username=jose email=jose@example.com
+2025-11-16 17:26:59,765 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:26:59,765 - pokedex_api - INFO - Response: POST /auth/register | status=400 | duration=0.005s
+2025-11-16 17:27:37,034 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:27:37,037 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:27:37,037 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:27:37,037 - sqlalchemy.engine.Engine - INFO - [cached since 359s ago] ('jose',)
+2025-11-16 17:27:37,050 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:27:37,051 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:27:37,051 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.017s
+2025-11-16 17:27:54,193 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:27:54,195 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:27:54,196 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:27:54,196 - sqlalchemy.engine.Engine - INFO - [cached since 376.1s ago] ('jose',)
+2025-11-16 17:27:54,211 - pokedex_api - INFO - Login successful | user_id=1 username=jose
+2025-11-16 17:27:54,211 - pokedex_api - INFO - Response: POST /auth/login | status=200 | duration=0.019s
+2025-11-16 17:27:54,212 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:28:47,154 - pokedex_api - INFO - Request: GET /api/v1/pokemon/search
+2025-11-16 17:28:47,155 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:28:47,156 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:28:47,156 - sqlalchemy.engine.Engine - INFO - [cached since 429.1s ago] ('jose',)
+2025-11-16 17:28:47,425 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0
+2025-11-16 17:28:47,466 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0 "HTTP/1.1 200 OK"
+2025-11-16 17:28:47,467 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0 | status=200 | duration=0.042s
+2025-11-16 17:28:47,468 - pokedex_api - INFO - Response: GET /api/v1/pokemon/search | status=200 | duration=0.314s
+2025-11-16 17:28:47,468 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:29:26,914 - pokedex_api - INFO - Request: GET /api/v1/pokemon/1
+2025-11-16 17:29:27,163 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/1
+2025-11-16 17:29:27,191 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/1 "HTTP/1.1 200 OK"
+2025-11-16 17:29:27,193 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/1 | status=200 | duration=0.030s
+2025-11-16 17:29:27,196 - pokedex_api - INFO - Response: GET /api/v1/pokemon/1 | status=200 | duration=0.282s
+2025-11-16 17:29:48,842 - pokedex_api - INFO - Request: GET /api/v1/pokemon/type/fire
+2025-11-16 17:29:49,098 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/type/fire
+2025-11-16 17:29:49,124 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/type/fire "HTTP/1.1 200 OK"
+2025-11-16 17:29:49,125 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/type/fire | status=200 | duration=0.027s
+2025-11-16 17:29:49,126 - pokedex_api - INFO - Response: GET /api/v1/pokemon/type/fire | status=200 | duration=0.284s
+2025-11-16 17:30:30,564 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:30,566 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:30,567 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:30,567 - sqlalchemy.engine.Engine - INFO - [cached since 532.5s ago] ('jose',)
+2025-11-16 17:30:30,581 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:30,581 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:30,582 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.017s
+2025-11-16 17:30:31,290 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:31,292 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:31,293 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:31,293 - sqlalchemy.engine.Engine - INFO - [cached since 533.2s ago] ('jose',)
+2025-11-16 17:30:31,309 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:31,309 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:31,310 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.020s
+2025-11-16 17:30:31,536 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:31,539 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:31,539 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:31,539 - sqlalchemy.engine.Engine - INFO - [cached since 533.5s ago] ('jose',)
+2025-11-16 17:30:31,553 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:31,554 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:31,554 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.018s
+2025-11-16 17:30:31,684 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:31,686 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:31,686 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:31,687 - sqlalchemy.engine.Engine - INFO - [cached since 533.6s ago] ('jose',)
+2025-11-16 17:30:31,702 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:31,703 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:31,703 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.020s
+2025-11-16 17:30:31,824 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:31,827 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:31,827 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:31,827 - sqlalchemy.engine.Engine - INFO - [cached since 533.8s ago] ('jose',)
+2025-11-16 17:30:31,841 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:31,842 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:31,842 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.018s
+2025-11-16 17:30:31,950 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:31,953 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:31,953 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:31,953 - sqlalchemy.engine.Engine - INFO - [cached since 533.9s ago] ('jose',)
+2025-11-16 17:30:31,966 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:31,967 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:31,967 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.017s
+2025-11-16 17:30:32,064 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,067 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:32,068 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:32,068 - sqlalchemy.engine.Engine - INFO - [cached since 534s ago] ('jose',)
+2025-11-16 17:30:32,082 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:32,082 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:32,083 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.019s
+2025-11-16 17:30:32,199 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,202 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:32,202 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:32,202 - sqlalchemy.engine.Engine - INFO - [cached since 534.1s ago] ('jose',)
+2025-11-16 17:30:32,216 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:32,216 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:32,217 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.017s
+2025-11-16 17:30:32,324 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,326 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:32,327 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:32,327 - sqlalchemy.engine.Engine - INFO - [cached since 534.3s ago] ('jose',)
+2025-11-16 17:30:32,341 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:32,341 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:32,342 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.018s
+2025-11-16 17:30:32,528 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,530 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 17:30:32,530 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 17:30:32,531 - sqlalchemy.engine.Engine - INFO - [cached since 534.5s ago] ('jose',)
+2025-11-16 17:30:32,545 - pokedex_api - WARNING - Login failed (bad credentials) | username=jose
+2025-11-16 17:30:32,545 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 17:30:32,546 - pokedex_api - INFO - Response: POST /auth/login | status=401 | duration=0.018s
+2025-11-16 17:30:32,665 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,667 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:32,667 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:32,762 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,764 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:32,764 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:32,851 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,853 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:32,853 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:32,973 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:32,975 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:32,975 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,090 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,091 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,092 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,188 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,190 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,190 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,312 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,313 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,314 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,428 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,430 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,430 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,521 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,522 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,523 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,657 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,659 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,660 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:33,851 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:33,853 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:33,853 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,080 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,082 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,083 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,196 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,198 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,199 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,319 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,321 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,321 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,419 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,421 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,421 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,542 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,549 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,549 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,654 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,656 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,657 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,769 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,771 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,772 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,890 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:34,892 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:34,892 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:34,998 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,000 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,001 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:35,119 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,120 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,121 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:35,241 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,243 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,244 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:35,340 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,342 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,342 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:35,462 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,464 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,464 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:35,784 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:35,785 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:35,786 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 17:30:36,221 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 17:30:36,223 - slowapi - WARNING - ratelimit 10 per 1 minute (127.0.0.1) exceeded at endpoint: /auth/login
+2025-11-16 17:30:36,223 - pokedex_api - WARNING - Rate limit exceeded: POST /auth/login | detail=10 per 1 minute
+2025-11-16 18:06:58,196 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:06:58,196 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("user")
+2025-11-16 18:06:58,196 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 18:06:58,197 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("pokedexentry")
+2025-11-16 18:06:58,197 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 18:06:58,197 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("team")
+2025-11-16 18:06:58,197 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 18:06:58,198 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("teammember")
+2025-11-16 18:06:58,198 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-11-16 18:06:58,198 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-11-16 18:06:58,198 - pokedex_api - INFO - Application startup completed
+2025-11-16 18:07:05,866 - pokedex_api - INFO - Request: GET /docs
+2025-11-16 18:07:05,867 - pokedex_api - INFO - Response: GET /docs | status=200 | duration=0.001s
+2025-11-16 18:07:05,924 - pokedex_api - INFO - Request: GET /openapi.json
+2025-11-16 18:07:05,949 - pokedex_api - INFO - Response: GET /openapi.json | status=200 | duration=0.025s
+2025-11-16 18:07:50,018 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 18:07:50,021 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:07:50,029 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:07:50,029 - sqlalchemy.engine.Engine - INFO - [generated in 0.00043s] ('jose',)
+2025-11-16 18:07:50,043 - pokedex_api - INFO - Login successful | user_id=1 username=jose
+2025-11-16 18:07:50,044 - pokedex_api - INFO - Response: POST /auth/login | status=200 | duration=0.026s
+2025-11-16 18:07:50,045 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:08:10,693 - pokedex_api - INFO - Request: POST /auth/login
+2025-11-16 18:08:10,695 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:08:10,695 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:08:10,695 - sqlalchemy.engine.Engine - INFO - [cached since 20.66s ago] ('jose',)
+2025-11-16 18:08:10,708 - pokedex_api - INFO - Login successful | user_id=1 username=jose
+2025-11-16 18:08:10,709 - pokedex_api - INFO - Response: POST /auth/login | status=200 | duration=0.016s
+2025-11-16 18:08:10,709 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:08:23,236 - pokedex_api - INFO - Request: GET /api/v1/pokemon/search
+2025-11-16 18:08:23,237 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:08:23,237 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:08:23,238 - sqlalchemy.engine.Engine - INFO - [cached since 33.21s ago] ('jose',)
+2025-11-16 18:08:23,509 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0
+2025-11-16 18:08:23,545 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0 "HTTP/1.1 200 OK"
+2025-11-16 18:08:23,545 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon?limit=20&offset=0 | status=200 | duration=0.037s
+2025-11-16 18:08:23,546 - pokedex_api - INFO - Response: GET /api/v1/pokemon/search | status=200 | duration=0.310s
+2025-11-16 18:08:23,546 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:08:32,695 - pokedex_api - INFO - Request: GET /api/v1/pokemon/25
+2025-11-16 18:08:32,946 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/25
+2025-11-16 18:08:32,976 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/25 "HTTP/1.1 200 OK"
+2025-11-16 18:08:32,977 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/25 | status=200 | duration=0.031s
+2025-11-16 18:08:32,981 - pokedex_api - INFO - Response: GET /api/v1/pokemon/25 | status=200 | duration=0.286s
+2025-11-16 18:08:52,496 - pokedex_api - INFO - Request: GET /api/v1/pokemon/type/water
+2025-11-16 18:08:52,744 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/type/water
+2025-11-16 18:08:52,824 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/type/water "HTTP/1.1 200 OK"
+2025-11-16 18:08:52,824 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/type/water | status=200 | duration=0.080s
+2025-11-16 18:08:52,826 - pokedex_api - INFO - Response: GET /api/v1/pokemon/type/water | status=200 | duration=0.330s
+2025-11-16 18:09:03,833 - pokedex_api - INFO - Request: GET /api/v1/pokemon/25/card
+2025-11-16 18:09:03,834 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:09:03,834 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:09:03,835 - sqlalchemy.engine.Engine - INFO - [cached since 73.8s ago] ('jose',)
+2025-11-16 18:09:04,103 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/25
+2025-11-16 18:09:04,132 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/25 "HTTP/1.1 200 OK"
+2025-11-16 18:09:04,133 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/25 | status=200 | duration=0.030s
+2025-11-16 18:09:04,136 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon-species/25/
+2025-11-16 18:09:04,151 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon-species/25/ "HTTP/1.1 200 OK"
+2025-11-16 18:09:04,152 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon-species/25/ | status=200 | duration=0.016s
+2025-11-16 18:09:04,433 - httpx - INFO - HTTP Request: GET https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png "HTTP/1.1 200 OK"
+2025-11-16 18:09:04,450 - pokedex_api - INFO - Response: GET /api/v1/pokemon/25/card | status=200 | duration=0.617s
+2025-11-16 18:09:04,451 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:09:34,604 - pokedex_api - INFO - Request: GET /api/v1/pokemon/blastoise/card
+2025-11-16 18:09:34,605 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:09:34,605 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:09:34,605 - sqlalchemy.engine.Engine - INFO - [cached since 104.6s ago] ('jose',)
+2025-11-16 18:09:34,852 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/blastoise
+2025-11-16 18:09:34,880 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/blastoise "HTTP/1.1 200 OK"
+2025-11-16 18:09:34,881 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/blastoise | status=200 | duration=0.029s
+2025-11-16 18:09:34,883 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon-species/9/
+2025-11-16 18:09:34,940 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon-species/9/ "HTTP/1.1 200 OK"
+2025-11-16 18:09:34,941 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon-species/9/ | status=200 | duration=0.057s
+2025-11-16 18:09:35,354 - httpx - INFO - HTTP Request: GET https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png "HTTP/1.1 200 OK"
+2025-11-16 18:09:35,357 - pokedex_api - INFO - Response: GET /api/v1/pokemon/blastoise/card | status=200 | duration=0.753s
+2025-11-16 18:09:35,358 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:10:01,892 - pokedex_api - INFO - Request: POST /api/v1/pokedex
+2025-11-16 18:10:01,894 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:01,894 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:10:01,895 - sqlalchemy.engine.Engine - INFO - [cached since 131.9s ago] ('jose',)
+2025-11-16 18:10:01,897 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ? AND pokedexentry.pokemon_id = ?
+2025-11-16 18:10:01,898 - sqlalchemy.engine.Engine - INFO - [generated in 0.00044s] (1, 25)
+2025-11-16 18:10:01,898 - pokedex_api - INFO - PokeAPI request (sync) | GET https://pokeapi.co/api/v2/pokemon/25
+2025-11-16 18:10:02,195 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/25 "HTTP/1.1 200 OK"
+2025-11-16 18:10:02,196 - pokedex_api - INFO - PokeAPI response (sync) | GET https://pokeapi.co/api/v2/pokemon/25 | status=200 | duration=0.298s
+2025-11-16 18:10:02,210 - sqlalchemy.engine.Engine - INFO - INSERT INTO pokedexentry (pokemon_id, is_captured, nickname, notes, favorite, owner_id, pokemon_name, pokemon_sprite, capture_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-11-16 18:10:02,211 - sqlalchemy.engine.Engine - INFO - [generated in 0.00037s] (25, 0, 'string', 'string', 0, 1, 'pikachu', 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png', None, '2025-11-16 17:10:02.209454')
+2025-11-16 18:10:02,212 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-11-16 18:10:02,215 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:02,216 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.id = ?
+2025-11-16 18:10:02,217 - sqlalchemy.engine.Engine - INFO - [generated in 0.00026s] (3,)
+2025-11-16 18:10:02,218 - pokedex_api - INFO - Response: POST /api/v1/pokedex | status=201 | duration=0.325s
+2025-11-16 18:10:02,219 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:10:14,606 - pokedex_api - INFO - Request: GET /api/v1/pokedex
+2025-11-16 18:10:14,608 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:14,608 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:10:14,608 - sqlalchemy.engine.Engine - INFO - [cached since 144.6s ago] ('jose',)
+2025-11-16 18:10:14,611 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ? ORDER BY pokedexentry.pokemon_id ASC
+ LIMIT ? OFFSET ?
+2025-11-16 18:10:14,612 - sqlalchemy.engine.Engine - INFO - [generated in 0.00097s] (1, 20, 0)
+2025-11-16 18:10:14,613 - pokedex_api - INFO - Response: GET /api/v1/pokedex | status=200 | duration=0.007s
+2025-11-16 18:10:14,614 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:10:36,775 - pokedex_api - INFO - Request: GET /api/v1/pokedex/export
+2025-11-16 18:10:36,776 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:36,776 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:10:36,776 - sqlalchemy.engine.Engine - INFO - [cached since 166.7s ago] ('jose',)
+2025-11-16 18:10:36,779 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ?
+2025-11-16 18:10:36,779 - sqlalchemy.engine.Engine - INFO - [generated in 0.00045s] (1,)
+2025-11-16 18:10:36,780 - pokedex_api - INFO - Response: GET /api/v1/pokedex/export | status=200 | duration=0.005s
+2025-11-16 18:10:36,781 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:10:50,455 - pokedex_api - INFO - Request: GET /api/v1/pokedex/stats
+2025-11-16 18:10:50,456 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:50,456 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:10:50,457 - sqlalchemy.engine.Engine - INFO - [cached since 180.4s ago] ('jose',)
+2025-11-16 18:10:50,457 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ?
+2025-11-16 18:10:50,458 - sqlalchemy.engine.Engine - INFO - [cached since 13.68s ago] (1,)
+2025-11-16 18:10:50,710 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/1
+2025-11-16 18:10:50,741 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/1 "HTTP/1.1 200 OK"
+2025-11-16 18:10:50,743 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/1 | status=200 | duration=0.033s
+2025-11-16 18:10:50,995 - pokedex_api - INFO - PokeAPI request (async) | GET https://pokeapi.co/api/v2/pokemon/25
+2025-11-16 18:10:51,022 - httpx - INFO - HTTP Request: GET https://pokeapi.co/api/v2/pokemon/25 "HTTP/1.1 200 OK"
+2025-11-16 18:10:51,024 - pokedex_api - INFO - PokeAPI response (async) | GET https://pokeapi.co/api/v2/pokemon/25 | status=200 | duration=0.029s
+2025-11-16 18:10:51,026 - pokedex_api - INFO - Response: GET /api/v1/pokedex/stats | status=200 | duration=0.571s
+2025-11-16 18:10:51,027 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:10:57,067 - pokedex_api - INFO - Request: GET /api/v1/teams
+2025-11-16 18:10:57,068 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:10:57,069 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:10:57,069 - sqlalchemy.engine.Engine - INFO - [cached since 187s ago] ('jose',)
+2025-11-16 18:10:57,070 - sqlalchemy.engine.Engine - INFO - SELECT team.name, team.description, team.id, team.trainer_id, team.created_at 
+FROM team 
+WHERE team.trainer_id = ?
+2025-11-16 18:10:57,071 - sqlalchemy.engine.Engine - INFO - [generated in 0.00028s] (1,)
+2025-11-16 18:10:57,073 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position, pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id AS id_1, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM teammember JOIN pokedexentry ON teammember.pokedex_entry_id = pokedexentry.id 
+WHERE teammember.team_id = ? ORDER BY teammember.position
+2025-11-16 18:10:57,074 - sqlalchemy.engine.Engine - INFO - [generated in 0.00037s] (1,)
+2025-11-16 18:10:57,075 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position, pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id AS id_1, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM teammember JOIN pokedexentry ON teammember.pokedex_entry_id = pokedexentry.id 
+WHERE teammember.team_id = ? ORDER BY teammember.position
+2025-11-16 18:10:57,075 - sqlalchemy.engine.Engine - INFO - [cached since 0.001668s ago] (2,)
+2025-11-16 18:10:57,076 - pokedex_api - INFO - Response: GET /api/v1/teams | status=200 | duration=0.009s
+2025-11-16 18:10:57,077 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:11:43,382 - pokedex_api - INFO - Request: POST /api/v1/teams
+2025-11-16 18:11:43,383 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:11:43,384 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:11:43,384 - sqlalchemy.engine.Engine - INFO - [cached since 233.3s ago] ('jose',)
+2025-11-16 18:11:43,385 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ? AND pokedexentry.pokemon_id = ?
+2025-11-16 18:11:43,385 - sqlalchemy.engine.Engine - INFO - [cached since 101.5s ago] (1, 25)
+2025-11-16 18:11:43,387 - sqlalchemy.engine.Engine - INFO - INSERT INTO team (name, description, trainer_id, created_at) VALUES (?, ?, ?, ?)
+2025-11-16 18:11:43,387 - sqlalchemy.engine.Engine - INFO - [generated in 0.00024s] ('Equipo pikachuu', 'high voltage equipe', 1, '2025-11-16 17:11:43.386354')
+2025-11-16 18:11:43,388 - sqlalchemy.engine.Engine - INFO - INSERT INTO teammember (team_id, pokedex_entry_id, position) VALUES (?, ?, ?)
+2025-11-16 18:11:43,389 - sqlalchemy.engine.Engine - INFO - [generated in 0.00025s] (3, 3, 1)
+2025-11-16 18:11:43,389 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-11-16 18:11:43,392 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:11:43,392 - sqlalchemy.engine.Engine - INFO - SELECT team.name, team.description, team.id, team.trainer_id, team.created_at 
+FROM team 
+WHERE team.id = ?
+2025-11-16 18:11:43,392 - sqlalchemy.engine.Engine - INFO - [generated in 0.00018s] (3,)
+2025-11-16 18:11:43,393 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position, pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id AS id_1, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM teammember JOIN pokedexentry ON teammember.pokedex_entry_id = pokedexentry.id 
+WHERE teammember.team_id = ? ORDER BY teammember.position
+2025-11-16 18:11:43,393 - sqlalchemy.engine.Engine - INFO - [cached since 46.31s ago] (3,)
+2025-11-16 18:11:43,394 - pokedex_api - INFO - Response: POST /api/v1/teams | status=201 | duration=0.012s
+2025-11-16 18:11:43,395 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:12:12,209 - pokedex_api - INFO - Request: PUT /api/v1/teams/3
+2025-11-16 18:12:12,210 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:12:12,211 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:12:12,211 - sqlalchemy.engine.Engine - INFO - [cached since 262.2s ago] ('jose',)
+2025-11-16 18:12:12,213 - sqlalchemy.engine.Engine - INFO - SELECT team.name AS team_name, team.description AS team_description, team.id AS team_id, team.trainer_id AS team_trainer_id, team.created_at AS team_created_at 
+FROM team 
+WHERE team.id = ?
+2025-11-16 18:12:12,213 - sqlalchemy.engine.Engine - INFO - [generated in 0.00030s] (3,)
+2025-11-16 18:12:12,215 - sqlalchemy.engine.Engine - INFO - UPDATE team SET name=?, description=? WHERE team.id = ?
+2025-11-16 18:12:12,215 - sqlalchemy.engine.Engine - INFO - [generated in 0.00028s] ('Equipo pika', 'string', 3)
+2025-11-16 18:12:12,216 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ? AND pokedexentry.pokemon_id = ?
+2025-11-16 18:12:12,217 - sqlalchemy.engine.Engine - INFO - [cached since 130.3s ago] (1, 0)
+2025-11-16 18:12:12,217 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:12:12,218 - pokedex_api - INFO - Response: PUT /api/v1/teams/3 | status=400 | duration=0.009s
+2025-11-16 18:12:25,285 - pokedex_api - INFO - Request: PUT /api/v1/teams/3
+2025-11-16 18:12:25,286 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:12:25,287 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:12:25,287 - sqlalchemy.engine.Engine - INFO - [cached since 275.2s ago] ('jose',)
+2025-11-16 18:12:25,288 - sqlalchemy.engine.Engine - INFO - SELECT team.name AS team_name, team.description AS team_description, team.id AS team_id, team.trainer_id AS team_trainer_id, team.created_at AS team_created_at 
+FROM team 
+WHERE team.id = ?
+2025-11-16 18:12:25,288 - sqlalchemy.engine.Engine - INFO - [cached since 13.07s ago] (3,)
+2025-11-16 18:12:25,289 - sqlalchemy.engine.Engine - INFO - UPDATE team SET name=?, description=? WHERE team.id = ?
+2025-11-16 18:12:25,289 - sqlalchemy.engine.Engine - INFO - [cached since 13.07s ago] ('Equipo pika', 'string', 3)
+2025-11-16 18:12:25,290 - sqlalchemy.engine.Engine - INFO - SELECT pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM pokedexentry 
+WHERE pokedexentry.owner_id = ? AND pokedexentry.pokemon_id = ?
+2025-11-16 18:12:25,290 - sqlalchemy.engine.Engine - INFO - [cached since 143.4s ago] (1, 25)
+2025-11-16 18:12:25,291 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position 
+FROM teammember 
+WHERE teammember.team_id = ?
+2025-11-16 18:12:25,291 - sqlalchemy.engine.Engine - INFO - [generated in 0.00016s] (3,)
+2025-11-16 18:12:25,292 - sqlalchemy.engine.Engine - INFO - DELETE FROM teammember WHERE teammember.team_id = ?
+2025-11-16 18:12:25,292 - sqlalchemy.engine.Engine - INFO - [generated in 0.00020s] (3,)
+2025-11-16 18:12:25,293 - sqlalchemy.engine.Engine - INFO - INSERT INTO teammember (team_id, pokedex_entry_id, position) VALUES (?, ?, ?)
+2025-11-16 18:12:25,293 - sqlalchemy.engine.Engine - INFO - [cached since 41.9s ago] (3, 3, 1)
+2025-11-16 18:12:25,293 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-11-16 18:12:25,296 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:12:25,297 - sqlalchemy.engine.Engine - INFO - SELECT team.name, team.description, team.id, team.trainer_id, team.created_at 
+FROM team 
+WHERE team.id = ?
+2025-11-16 18:12:25,297 - sqlalchemy.engine.Engine - INFO - [cached since 41.9s ago] (3,)
+2025-11-16 18:12:25,297 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position, pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id AS id_1, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM teammember JOIN pokedexentry ON teammember.pokedex_entry_id = pokedexentry.id 
+WHERE teammember.team_id = ? ORDER BY teammember.position
+2025-11-16 18:12:25,298 - sqlalchemy.engine.Engine - INFO - [cached since 88.21s ago] (3,)
+2025-11-16 18:12:25,299 - pokedex_api - INFO - Response: PUT /api/v1/teams/3 | status=200 | duration=0.014s
+2025-11-16 18:12:25,299 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:12:39,610 - pokedex_api - INFO - Request: GET /api/v1/teams/3/export
+2025-11-16 18:12:39,611 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-11-16 18:12:39,612 - sqlalchemy.engine.Engine - INFO - SELECT user.username, user.email, user.id, user.hashed_password, user.created_at, user.is_active 
+FROM user 
+WHERE user.username = ?
+2025-11-16 18:12:39,612 - sqlalchemy.engine.Engine - INFO - [cached since 289.6s ago] ('jose',)
+2025-11-16 18:12:39,613 - sqlalchemy.engine.Engine - INFO - SELECT team.name AS team_name, team.description AS team_description, team.id AS team_id, team.trainer_id AS team_trainer_id, team.created_at AS team_created_at 
+FROM team 
+WHERE team.id = ?
+2025-11-16 18:12:39,613 - sqlalchemy.engine.Engine - INFO - [cached since 27.4s ago] (3,)
+2025-11-16 18:12:39,614 - sqlalchemy.engine.Engine - INFO - SELECT teammember.id, teammember.team_id, teammember.pokedex_entry_id, teammember.position, pokedexentry.pokemon_id, pokedexentry.is_captured, pokedexentry.nickname, pokedexentry.notes, pokedexentry.favorite, pokedexentry.id AS id_1, pokedexentry.owner_id, pokedexentry.pokemon_name, pokedexentry.pokemon_sprite, pokedexentry.capture_date, pokedexentry.created_at 
+FROM teammember JOIN pokedexentry ON teammember.pokedex_entry_id = pokedexentry.id 
+WHERE teammember.team_id = ? ORDER BY teammember.position
+2025-11-16 18:12:39,614 - sqlalchemy.engine.Engine - INFO - [cached since 102.5s ago] (3,)
+2025-11-16 18:12:39,615 - pokedex_api - INFO - Response: GET /api/v1/teams/3/export | status=200 | duration=0.005s
+2025-11-16 18:12:39,616 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-11-16 18:12:50,681 - pokedex_api - INFO - Request: GET /health
+2025-11-16 18:12:50,682 - pokedex_api - INFO - Response: GET /health | status=200 | duration=0.001s

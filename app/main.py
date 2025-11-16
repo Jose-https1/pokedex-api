@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from datetime import datetime
+
+from fastapi import FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
 from slowapi import _rate_limit_exceeded_handler
@@ -6,6 +8,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.limiter import limiter
+from app.logging_config import logger
 
 from .config import settings
 from .database import create_db_and_tables
@@ -16,6 +19,7 @@ from .routers import (
     teams as teams_router,
 )
 
+from fastapi.middleware.cors import CORSMiddleware
 
 # Crear la app FastAPI usando los ajustes de config
 app = FastAPI(
@@ -23,7 +27,23 @@ app = FastAPI(
     version=settings.app_version,
 )
 
-# ---------- Integración SlowAPI (rate limiting) ----------
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",   # React dev
+        "http://localhost:5173",   # Vite dev
+        "https://tu-dominio.com",  # Producción (placeholder)
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+    max_age=3600,
+)
+
+
+
+# ---------- SlowAPI (rate limiting) ----------
 
 # Guardar el limiter en el estado de la app
 app.state.limiter = limiter
@@ -31,8 +51,41 @@ app.state.limiter = limiter
 # Middleware que aplica el rate limiting
 app.add_middleware(SlowAPIMiddleware)
 
-# Manejador de excepción cuando se excede el límite
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Handler personalizado para rate limit excedido (log + handler por defecto)
+async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    logger.warning(
+        "Rate limit exceeded: %s %s | detail=%s",
+        request.method,
+        request.url.path,
+        exc.detail,
+    )
+    return await _rate_limit_exceeded_handler(request, exc)
+
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
+
+
+# ---------- Middleware de logging de peticiones ----------
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = datetime.utcnow()
+
+    logger.info("Request: %s %s", request.method, request.url.path)
+
+    response = await call_next(request)
+
+    duration = (datetime.utcnow() - start_time).total_seconds()
+    logger.info(
+        "Response: %s %s | status=%d | duration=%.3fs",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration,
+    )
+
+    return response
 
 
 # ---------- OpenAPI personalizado con botón "Authorize" ----------
@@ -74,6 +127,7 @@ app.openapi = custom_openapi
 @app.on_event("startup")
 def on_startup() -> None:
     create_db_and_tables()
+    logger.info("Application startup completed")
 
 
 # ---------- Routers ----------

@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 
 from app.limiter import limiter
+from app.logging_config import logger
 from ..dependencies import SessionDep
 from ..models import User, UserCreate, UserRead
 from ..auth import authenticate_user, create_access_token, get_password_hash
@@ -24,7 +25,7 @@ router = APIRouter(
 )
 @limiter.limit("5/hour")  # 5 registros por hora y por IP
 def register_user(
-    request: Request,   # <-- necesario para SlowAPI
+    request: Request,
     user_in: UserCreate,
     session: SessionDep,
 ) -> User:
@@ -39,6 +40,11 @@ def register_user(
     )
     existing_user = session.exec(statement).first()
     if existing_user:
+        logger.warning(
+            "Register failed (duplicate) | username=%s email=%s",
+            user_in.username,
+            user_in.email,
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username or email already registered",
@@ -52,13 +58,15 @@ def register_user(
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    logger.info("User registered successfully | user_id=%s username=%s", user.id, user.username)
     return user
 
 
 @router.post("/login")
 @limiter.limit("10/minute")  # 10 intentos de login por minuto y por IP
 def login_for_access_token(
-    request: Request,   # <-- necesario para SlowAPI
+    request: Request,
     session: SessionDep,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
@@ -70,6 +78,10 @@ def login_for_access_token(
     """
     user = authenticate_user(session, form_data.username, form_data.password)
     if not user:
+        logger.warning(
+            "Login failed (bad credentials) | username=%s",
+            form_data.username,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -81,6 +93,9 @@ def login_for_access_token(
         data={"sub": user.username},
         expires_delta=access_token_expires,
     )
+
+    logger.info("Login successful | user_id=%s username=%s", user.id, user.username)
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
