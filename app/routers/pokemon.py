@@ -1,102 +1,101 @@
 
+from typing import Any, Dict, Optional, List
 
-from typing import Dict, List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from fastapi import APIRouter, Depends, Query
-
-from ..auth import get_current_user
-from ..models import User
-from ..services.pokeapi_service import PokeAPIService
+from app.dependencies import get_current_user
+from app.models import User
+from app.services.pokeapi_service import PokeAPIService
 
 router = APIRouter(
     prefix="/api/v1/pokemon",
     tags=["pokemon"],
 )
 
-# Usamos una única instancia del servicio para todo el router
 pokeapi_service = PokeAPIService()
 
 
-@router.get("/search")
+@router.get(
+    "/search",
+    summary="Search Pokemon",
+    description=(
+        "Busca Pokémon en PokeAPI.\n\n"
+        "- Si se pasa `name`, devuelve solo ese Pokémon.\n"
+        "- Si no se pasa `name`, devuelve una lista paginada."
+    ),
+)
 async def search_pokemon(
     name: Optional[str] = Query(
-        None,
-        description="Nombre del Pokémon a buscar (opcional)",
+        default=None,
+        description="Nombre del Pokémon (opcional)",
+        min_length=1,
     ),
     limit: int = Query(
-        20,
+        default=20,
         ge=1,
-        le=200,
-        description="Número de Pokémon por página (si no se indica name)",
+        le=100,
+        description="Número máximo de resultados",
     ),
     offset: int = Query(
-        0,
+        default=0,
         ge=0,
-        description="Offset para la paginación (si no se indica name)",
+        description="Offset para paginación",
     ),
     current_user: User = Depends(get_current_user),
-) -> Dict:
+) -> Dict[str, Any]:
     """
-    Busca Pokémon en PokeAPI.
+    Endpoint proxy a PokeAPI:
 
-    - Si se indica `name`, devuelve solo ese Pokémon (si existe).
-    - Si NO se indica `name`, lista Pokémon con paginación usando
-      /pokemon?limit=&offset=.
-
-    Requiere autenticación.
+    - GET /api/v1/pokemon/search?name=pikachu
+    - GET /api/v1/pokemon/search?limit=20&offset=0
     """
-
-    # Caso 1: búsqueda directa por nombre
-    if name:
-        pokemon = await pokeapi_service.get_pokemon(name.strip().lower())
-        return {
-            "count": 1,
-            "results": [pokemon],
-        }
-
-    # Caso 2: listado paginado
-    data = await pokeapi_service.search_pokemon(limit=limit, offset=offset)
-
-    # PokeAPI devuelve solo name+url; aquí enriquecemos cada uno con detalles
-    results: List[Dict] = []
-
-    for item in data.get("results", []):
-        url = item.get("url", "")
-        try:
-            poke_id = int(url.rstrip("/").split("/")[-1])
-        except (ValueError, IndexError):
-            # Si no podemos sacar el id, lo saltamos
-            continue
-
-        details = await pokeapi_service.get_pokemon(poke_id)
-        results.append(details)
-
-    return {
-        "count": data.get("count", len(results)),
-        "results": results,
-    }
+    return await pokeapi_service.search_pokemon(
+        name=name,
+        limit=limit,
+        offset=offset,
+    )
 
 
-@router.get("/{id_or_name}")
+@router.get(
+    "/{id_or_name}",
+    summary="Get Pokemon Details",
+    description="Obtiene detalles completos de un Pokémon (stats, tipos, habilidades, sprite).",
+)
 async def get_pokemon_details(
     id_or_name: str,
     current_user: User = Depends(get_current_user),
-) -> Dict:
+) -> Dict[str, Any]:
     """
-    Devuelve los detalles completos de un Pokémon (stats, tipos, habilidades,
-    sprite...), usando /pokemon/{id_or_name}.
+    Devuelve un dict:
 
-    Requiere autenticación.
+    {
+      'id': ...,
+      'name': ...,
+      'sprite': ...,
+      'types': [...],
+      'stats': [{'name': ..., 'base': ...}],
+      'abilities': [...]
+    }
     """
-    pokemon = await pokeapi_service.get_pokemon(id_or_name)
-    return pokemon
+    return await pokeapi_service.get_pokemon(id_or_name)
 
-@router.get("/type/{type_name}")
+
+@router.get(
+    "/type/{type_name}",
+    summary="Get Pokemon By Type",
+    description="Obtiene todos los Pokémon de un tipo concreto (fire, water, grass...).",
+)
 async def get_pokemon_by_type(
     type_name: str,
-    current_user=Depends(get_current_user),
-):
+    current_user: User = Depends(get_current_user),
+) -> List[Dict[str, Any]]:
     """
-    Obtiene todos los Pokémon de un tipo concreto (fire, water, grass, etc.).
+    Ejemplo: GET /api/v1/pokemon/type/electric
     """
+    if not type_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="type_name is required",
+        )
+
     return await pokeapi_service.get_pokemon_by_type(type_name)
