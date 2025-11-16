@@ -3,8 +3,12 @@ from fastapi.openapi.utils import get_openapi
 
 from .config import settings
 from .database import create_db_and_tables
-from .routers import auth as auth_router, pokemon as pokemon_router
-from .routers import pokedex as pokedex_router
+from .routers import (
+    auth as auth_router,
+    pokemon as pokemon_router,
+    pokedex as pokedex_router,
+    teams as teams_router,
+)
 from fastapi.security import OAuth2PasswordBearer
 
 
@@ -59,6 +63,8 @@ app.include_router(auth_router.router)
 app.include_router(pokemon_router.router)
 
 app.include_router(pokedex_router.router)
+
+app.include_router(teams_router.router)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
