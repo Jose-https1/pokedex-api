@@ -1,0 +1,82 @@
+from datetime import timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import select
+
+from ..dependencies import SessionDep
+from ..models import User, UserCreate, UserRead
+from ..auth import authenticate_user, create_access_token, get_password_hash
+from ..config import settings
+
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+)
+
+
+@router.post(
+    "/register",
+    response_model=UserRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def register_user(
+    user_in: UserCreate,
+    session: SessionDep,
+) -> User:
+    """
+    Registro de un nuevo usuario.
+    - Verifica que username y email no estén ya usados.
+    - Guarda la contraseña hasheada en hashed_password.
+    """
+    # Comprobar username o email repetidos
+    statement = select(User).where(
+        (User.username == user_in.username) | (User.email == user_in.email)
+    )
+    existing_user = session.exec(statement).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username or email already registered",
+        )
+
+    user = User(
+        username=user_in.username,
+        email=user_in.email,
+        hashed_password=get_password_hash(user_in.password),
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@router.post("/login")
+def login_for_access_token(
+    session: SessionDep,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+):
+    """
+    Login usando formulario OAuth2:
+    - username
+    - password
+    Devuelve un access_token JWT.
+    """
+    user = authenticate_user(session, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=access_token_expires,
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }

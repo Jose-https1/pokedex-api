@@ -1,30 +1,77 @@
+# app/models.py
+
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
-from sqlmodel import SQLModel, Field, Relationship
-
-
-
-# usuarios:
-
-class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
-    username: str = Field(unique=True, index=True)
+from sqlmodel import SQLModel, Field
 
 
-class User(UserBase, table=True):
+# =========================
+# MODELOS DE BASE DE DATOS
+# =========================
+
+class User(SQLModel, table=True):
+    """Usuario del sistema."""
     id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(unique=True, index=True, min_length=3, max_length=50)
+    email: str = Field(unique=True, index=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = Field(default=True)
 
-    # relaciones
-    pokedex_entries: List["PokedexEntry"] = Relationship(back_populates="owner")
-    teams: List["Team"] = Relationship(back_populates="trainer")
+
+class PokedexEntry(SQLModel, table=True):
+    """Entrada en la Pokédex de un usuario."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    # Relación con el usuario (solo FK)
+    owner_id: int = Field(foreign_key="user.id")
+
+    # Datos del Pokémon (de PokeAPI)
+    pokemon_id: int = Field(index=True)  # ID en PokeAPI
+    pokemon_name: str
+    pokemon_sprite: str  # URL de la imagen
+
+    # Datos configurables por el usuario
+    is_captured: bool = Field(default=False)
+    capture_date: Optional[datetime] = None
+    nickname: Optional[str] = Field(default=None, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=500)
+    favorite: bool = Field(default=False)
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Team(SQLModel, table=True):
+    """Equipo de batalla (máximo 6 Pokémon)."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    trainer_id: int = Field(foreign_key="user.id")
+    name: str = Field(max_length=100)
+    description: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class TeamMember(SQLModel, table=True):
+    """Relación muchos a muchos entre Team y PokedexEntry."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    team_id: int = Field(foreign_key="team.id")
+    pokedex_entry_id: int = Field(foreign_key="pokedexentry.id")
+    position: int = Field(ge=1, le=6)  # Posición en el equipo (1-6)
+
+
+# =========================
+# SCHEMAS Pydantic (API)
+# =========================
+
+class UserBase(SQLModel):
+    username: str
+    email: str
 
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8)
+    password: str
 
 
 class UserRead(UserBase):
@@ -33,27 +80,22 @@ class UserRead(UserBase):
     is_active: bool
 
 
+class Token(SQLModel):
+    access_token: str
+    token_type: str = "bearer"
 
-#   pokedex entries
+
+class TokenData(SQLModel):
+    username: Optional[str] = None
+    user_id: Optional[int] = None
+
 
 class PokedexEntryBase(SQLModel):
-    pokemon_id: int = Field(index=True)       # ID en PokeAPI
-    pokemon_name: str
-    pokemon_sprite: str                       # URL de la imagen
-
-    is_captured: bool = False
-    favorite: bool = False
+    pokemon_id: int
     nickname: Optional[str] = Field(default=None, max_length=50)
     notes: Optional[str] = Field(default=None, max_length=500)
-
-
-class PokedexEntry(PokedexEntryBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    owner_id: int = Field(foreign_key="user.id")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    capture_date: Optional[datetime] = None
-
-    owner: "User" = Relationship(back_populates="pokedex_entries")
+    is_captured: bool = False
+    favorite: bool = False
 
 
 class PokedexEntryCreate(PokedexEntryBase):
@@ -63,53 +105,24 @@ class PokedexEntryCreate(PokedexEntryBase):
 class PokedexEntryRead(PokedexEntryBase):
     id: int
     owner_id: int
-    created_at: datetime
-    capture_date: Optional[datetime]
-
-
-#equipos:
-
-class TeamBase(SQLModel):
-    name: str = Field(max_length=100)
-    description: Optional[str] = None
-
-
-class Team(TeamBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    trainer_id: int = Field(foreign_key="user.id")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    trainer: "User" = Relationship(back_populates="teams")
-    members: List["TeamMember"] = Relationship(back_populates="team")
-
-
-class TeamCreate(TeamBase):
-    pokemon_ids: List[int] = []   # IDs de PokedexEntry para formar el equipo
-
-
-class TeamRead(TeamBase):
-    id: int
-    trainer_id: int
+    pokemon_name: str
+    pokemon_sprite: str
+    capture_date: Optional[datetime] = None
     created_at: datetime
 
 
-#miembros del equipo
-
-class TeamMemberBase(SQLModel):
-    team_id: int
-    pokedex_entry_id: int
-    position: int = Field(ge=1, le=6)   # posición 1-6
-
-
-class TeamMember(TeamMemberBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-
-    team: "Team" = Relationship(back_populates="members")
+class PokedexEntryUpdate(SQLModel):
+    nickname: Optional[str] = Field(default=None, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=500)
+    is_captured: Optional[bool] = None
+    favorite: Optional[bool] = None
+    capture_date: Optional[datetime] = None
 
 
-class TeamMemberCreate(TeamMemberBase):
-    pass
-
-
-class TeamMemberRead(TeamMemberBase):
-    id: int
+class PokedexStats(SQLModel):
+    total_pokemon: int
+    captured: int
+    favorites: int
+    completion_percentage: float
+    most_common_type: Optional[str] = None
+    capture_streak_days: int
