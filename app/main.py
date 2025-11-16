@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+
+from app.limiter import limiter
+
 from .config import settings
 from .database import create_db_and_tables
 from .routers import (
@@ -9,7 +15,6 @@ from .routers import (
     pokedex as pokedex_router,
     teams as teams_router,
 )
-from fastapi.security import OAuth2PasswordBearer
 
 
 # Crear la app FastAPI usando los ajustes de config
@@ -18,8 +23,20 @@ app = FastAPI(
     version=settings.app_version,
 )
 
+# ---------- Integración SlowAPI (rate limiting) ----------
 
-# OpenAPI personalizado para que aparezca el botón "Authorize"
+# Guardar el limiter en el estado de la app
+app.state.limiter = limiter
+
+# Middleware que aplica el rate limiting
+app.add_middleware(SlowAPIMiddleware)
+
+# Manejador de excepción cuando se excede el límite
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+# ---------- OpenAPI personalizado con botón "Authorize" ----------
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -52,19 +69,22 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
+# ---------- Eventos ----------
 
 @app.on_event("startup")
 def on_startup() -> None:
     create_db_and_tables()
 
 
-# Registrar routers
+# ---------- Routers ----------
+
 app.include_router(auth_router.router)
 app.include_router(pokemon_router.router)
-
 app.include_router(pokedex_router.router)
-
 app.include_router(teams_router.router)
+
+
+# Endpoint simple de healthcheck (sin autenticación)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

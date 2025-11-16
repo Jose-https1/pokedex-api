@@ -1,17 +1,16 @@
-# app/routers/pokedex.py
-
 from datetime import datetime, timedelta
 from collections import Counter
 from typing import List, Optional
 import csv
 import io
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fastapi.responses import Response
 from sqlmodel import Session, select
 
 from app.database import get_session
 from app.dependencies import get_current_user
+from app.limiter import limiter
 from app.models import (
     User,
     PokedexEntry,
@@ -87,7 +86,9 @@ def add_pokemon_to_pokedex(
     response_model=List[PokedexEntryRead],
     summary="List Pokedex",
 )
+@limiter.limit("100/minute")  # 100 lecturas por minuto y por IP
 def list_pokedex(
+    request: Request,  # <-- necesario para SlowAPI
     captured: Optional[bool] = Query(default=None),
     favorite: Optional[bool] = Query(default=None),
     sort: str = Query(default="pokemon_id", pattern="^(pokemon_id|capture_date|pokemon_name)$"),
@@ -178,7 +179,7 @@ def delete_pokedex_entry(
     return
 
 
-# ---------- NUEVO: Export de Pokédex ----------
+# ---------- Export de Pokédex ----------
 
 
 @router.get(
@@ -223,9 +224,9 @@ def export_pokedex(
     writer = csv.DictWriter(
         output,
         fieldnames=fieldnames,
-        delimiter=";",          # <-- Separador para Excel ES
+        delimiter=";",
         quotechar='"',
-        quoting=csv.QUOTE_ALL   # <-- Comillas en todos los campos (seguro)
+        quoting=csv.QUOTE_ALL,
     )
 
     writer.writeheader()
@@ -248,14 +249,13 @@ def export_pokedex(
     output.close()
 
     # Guardar con BOM para Excel
-    bom_csv = csv_data.encode("utf-8-sig")  # <-- BOM agregado
+    bom_csv = csv_data.encode("utf-8-sig")
 
     return Response(
         content=bom_csv,
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=pokedex_export.csv"},
     )
-
 
 
 # ---------- Stats ----------
