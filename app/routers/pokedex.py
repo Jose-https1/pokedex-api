@@ -3,11 +3,15 @@
 from datetime import datetime, timedelta
 from collections import Counter
 from typing import List, Optional
+import csv
+import io
 
-from fastapi import APIRouter, HTTPException, Query, status
-from sqlmodel import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
+from sqlmodel import Session, select
 
-from app.dependencies import SessionDep, CurrentUser
+from app.database import get_session
+from app.dependencies import get_current_user
 from app.models import (
     User,
     PokedexEntry,
@@ -42,8 +46,8 @@ def ensure_owner(entry: PokedexEntry, current_user: User) -> None:
 )
 def add_pokemon_to_pokedex(
     data: PokedexEntryCreate,
-    session: SessionDep,
-    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     # Comprobar duplicado para este usuario
     statement = select(PokedexEntry).where(
@@ -84,15 +88,14 @@ def add_pokemon_to_pokedex(
     summary="List Pokedex",
 )
 def list_pokedex(
-    session: SessionDep,
-    current_user: CurrentUser,
     captured: Optional[bool] = Query(default=None),
     favorite: Optional[bool] = Query(default=None),
     sort: str = Query(default="pokemon_id", pattern="^(pokemon_id|capture_date|pokemon_name)$"),
     order: str = Query(default="asc", pattern="^(asc|desc)$"),
     limit: int = Query(default=20, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     statement = select(PokedexEntry).where(PokedexEntry.owner_id == current_user.id)
 
@@ -125,8 +128,8 @@ def list_pokedex(
 def update_pokedex_entry(
     entry_id: int,
     data: PokedexEntryUpdate,
-    session: SessionDep,
-    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     entry = session.get(PokedexEntry, entry_id)
     if not entry:
@@ -158,8 +161,8 @@ def update_pokedex_entry(
 )
 def delete_pokedex_entry(
     entry_id: int,
-    session: SessionDep,
-    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     entry = session.get(PokedexEntry, entry_id)
     if not entry:
@@ -175,14 +178,97 @@ def delete_pokedex_entry(
     return
 
 
+# ---------- NUEVO: Export de Pokédex ----------
+
+
+@router.get(
+    "/export",
+    summary="Export Pokedex as CSV",
+)
+def export_pokedex(
+    format: str = Query(default="csv", pattern="^(csv)$"),
+    captured: Optional[bool] = None,
+    favorite: Optional[bool] = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    # Obtener entradas filtradas
+    stmt = select(PokedexEntry).where(PokedexEntry.owner_id == current_user.id)
+
+    if captured is not None:
+        stmt = stmt.where(PokedexEntry.is_captured == captured)
+    if favorite is not None:
+        stmt = stmt.where(PokedexEntry.favorite == favorite)
+
+    entries = session.exec(stmt).all()
+
+    # Columnas a exportar
+    fieldnames = [
+        "id",
+        "pokemon_id",
+        "pokemon_name",
+        "pokemon_sprite",
+        "is_captured",
+        "capture_date",
+        "nickname",
+        "notes",
+        "favorite",
+        "created_at",
+    ]
+
+    # Generar CSV en memoria
+    output = io.StringIO()
+
+    # Excel Spain friendly:
+    writer = csv.DictWriter(
+        output,
+        fieldnames=fieldnames,
+        delimiter=";",          # <-- Separador para Excel ES
+        quotechar='"',
+        quoting=csv.QUOTE_ALL   # <-- Comillas en todos los campos (seguro)
+    )
+
+    writer.writeheader()
+
+    for e in entries:
+        writer.writerow({
+            "id": e.id,
+            "pokemon_id": e.pokemon_id,
+            "pokemon_name": e.pokemon_name,
+            "pokemon_sprite": e.pokemon_sprite,
+            "is_captured": e.is_captured,
+            "capture_date": e.capture_date.isoformat() if e.capture_date else "",
+            "nickname": e.nickname or "",
+            "notes": e.notes or "",
+            "favorite": e.favorite,
+            "created_at": e.created_at.isoformat(),
+        })
+
+    csv_data = output.getvalue()
+    output.close()
+
+    # Guardar con BOM para Excel
+    bom_csv = csv_data.encode("utf-8-sig")  # <-- BOM agregado
+
+    return Response(
+        content=bom_csv,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=pokedex_export.csv"},
+    )
+
+
+
+# ---------- Stats ----------
+
+
 @router.get(
     "/stats",
     response_model=PokedexStats,
     summary="Get Pokedex Stats",
 )
 async def get_pokedex_stats(
-    session: SessionDep,
-    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     statement = select(PokedexEntry).where(PokedexEntry.owner_id == current_user.id)
     entries = session.exec(statement).all()
@@ -217,7 +303,7 @@ async def get_pokedex_stats(
         if current_streak > longest_streak:
             longest_streak = current_streak
 
-    # Calcular tipo más común consultando PokeAPI
+    # Calcular tipo más común consultando PokeAPI (para pocos Pokémon está bien)
     type_counter: Counter[str] = Counter()
     seen_ids = set()
 
