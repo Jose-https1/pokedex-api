@@ -1,9 +1,10 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 
+from app.limiter import limiter
 from ..dependencies import SessionDep
 from ..models import User, UserCreate, UserRead
 from ..auth import authenticate_user, create_access_token, get_password_hash
@@ -21,7 +22,9 @@ router = APIRouter(
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit("5/hour")  # 5 registros por hora y por IP
 def register_user(
+    request: Request,   # <-- necesario para SlowAPI
     user_in: UserCreate,
     session: SessionDep,
 ) -> User:
@@ -53,7 +56,9 @@ def register_user(
 
 
 @router.post("/login")
+@limiter.limit("10/minute")  # 10 intentos de login por minuto y por IP
 def login_for_access_token(
+    request: Request,   # <-- necesario para SlowAPI
     session: SessionDep,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):

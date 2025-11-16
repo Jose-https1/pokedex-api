@@ -4,7 +4,7 @@ import io
 from typing import Any, Dict, List, Optional
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fastapi.responses import Response
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
@@ -13,6 +13,7 @@ from reportlab.pdfgen import canvas
 from app.dependencies import get_current_user
 from app.models import User
 from app.services.pokeapi_service import PokeAPIService
+from app.limiter import limiter
 
 router = APIRouter(
     prefix="/api/v1/pokemon",
@@ -29,7 +30,9 @@ pokeapi_service = PokeAPIService()
     "/search",
     summary="Buscar Pokémon en PokeAPI",
 )
+@limiter.limit("30/minute")  # 30 búsquedas por minuto y por IP
 async def search_pokemon_endpoint(
+    request: Request,  # <-- necesario para SlowAPI
     name: Optional[str] = Query(default=None, description="Nombre (o parte) del Pokémon"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
@@ -157,7 +160,7 @@ def _generate_pokemon_card_pdf(pokemon: Dict[str, Any]) -> bytes:
     # Partimos la descripción en líneas cortas
     max_chars = 90
     for i in range(0, len(description), max_chars):
-        text_obj.textLine(description[i : i + max_chars])
+        text_obj.textLine(description[i: i + max_chars])
 
     c.drawText(text_obj)
 
