@@ -20,4 +20,4 @@ uv sync
 
 ## 🎥 Vídeo explicativo de la práctica
 
-[![Ver vídeo](https://img.shields.io/badge/Ver%20Vídeo-Google%20Drive-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/145aOleAgquill0YJ7_Ap5IIYwuFLScEz/view?usp=sharing)
+[![Ver vídeo](https://drive.google.com/file/d/145aOleAgquill0YJ7_Ap5IIYwuFLScEz/view?usp=sharing)]
