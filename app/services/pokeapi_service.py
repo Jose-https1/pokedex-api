@@ -1,12 +1,10 @@
-# app/services/pokeapi_service.py
-
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import httpx
 from fastapi import HTTPException, status
-from datetime import datetime
 
 from app.logging_config import logger
 
@@ -30,8 +28,12 @@ class PokeAPIService:
             ) from exc
 
         duration = (datetime.utcnow() - start).total_seconds()
-        logger.info("PokeAPI response (async) | GET %s | status=%d | duration=%.3fs",
-                    url, resp.status_code, duration)
+        logger.info(
+            "PokeAPI response (async) | GET %s | status=%d | duration=%.3fs",
+            url,
+            resp.status_code,
+            duration,
+        )
 
         if resp.status_code == 404:
             raise HTTPException(
@@ -61,8 +63,12 @@ class PokeAPIService:
             ) from exc
 
         duration = (datetime.utcnow() - start).total_seconds()
-        logger.info("PokeAPI response (sync) | GET %s | status=%d | duration=%.3fs",
-                    url, resp.status_code, duration)
+        logger.info(
+            "PokeAPI response (sync) | GET %s | status=%d | duration=%.3fs",
+            url,
+            resp.status_code,
+            duration,
+        )
 
         if resp.status_code == 404:
             raise HTTPException(
@@ -182,16 +188,28 @@ class PokeAPIService:
         for lang in ["es", "en"]:
             for entry in flavor_text_entries:
                 if entry.get("language", {}).get("name") == lang:
-                    description = entry.get("flavor_text", "").replace("\n", " ").replace("\f", " ")
+                    description = (
+                        entry.get("flavor_text", "")
+                        .replace("\n", " ")
+                        .replace("\f", " ")
+                    )
                     break
             if description:
                 break
 
         if not description and flavor_text_entries:
-            description = flavor_text_entries[0].get("flavor_text", "").replace("\n", " ").replace("\f", " ")
+            description = (
+                flavor_text_entries[0]
+                .get("flavor_text", "")
+                .replace("\n", " ")
+                .replace("\f", " ")
+            )
 
         types = [t["type"]["name"] for t in pokemon_data.get("types", [])]
-        stats = {s["stat"]["name"]: s["base_stat"] for s in pokemon_data.get("stats", [])}
+        stats = {
+            s["stat"]["name"]: s["base_stat"]
+            for s in pokemon_data.get("stats", [])
+        }
         abilities = [a["ability"]["name"] for a in pokemon_data.get("abilities", [])]
 
         result = {

@@ -27,7 +27,8 @@ app = FastAPI(
     version=settings.app_version,
 )
 
-# CORS
+# ---------- CORS ----------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -41,8 +42,6 @@ app.add_middleware(
     max_age=3600,
 )
 
-
-
 # ---------- SlowAPI (rate limiting) ----------
 
 # Guardar el limiter en el estado de la app
@@ -52,18 +51,19 @@ app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
 
-# Handler personalizado para rate limit excedido (log + handler por defecto)
-async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+# Handler personalizado para rate limit excedido (log + handler por defecto) (lo hacemos síncrono)
+@app.exception_handler(RateLimitExceeded)
+def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
     logger.warning(
         "Rate limit exceeded: %s %s | detail=%s",
         request.method,
         request.url.path,
         exc.detail,
     )
-    return await _rate_limit_exceeded_handler(request, exc)
+    return _rate_limit_exceeded_handler(request, exc)
 
 
-app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
+# (No hace falta app.add_exception_handler de nuevo, el decorador ya lo registra)
 
 
 # ---------- Middleware de logging de peticiones ----------
@@ -135,6 +135,8 @@ def on_startup() -> None:
 app.include_router(auth_router.router)
 app.include_router(pokemon_router.router)
 app.include_router(pokedex_router.router)
+
+app.include_router(pokedex_router.router_v2)
 app.include_router(teams_router.router)
 
 

@@ -26,6 +26,12 @@ router = APIRouter(
     tags=["pokedex"],
 )
 
+# NUEVO router v2
+router_v2 = APIRouter(
+    prefix="/api/v2/pokedex",
+    tags=["pokedex-v2"],
+)
+
 pokeapi_service = PokeAPIService()
 
 
@@ -232,18 +238,20 @@ def export_pokedex(
     writer.writeheader()
 
     for e in entries:
-        writer.writerow({
-            "id": e.id,
-            "pokemon_id": e.pokemon_id,
-            "pokemon_name": e.pokemon_name,
-            "pokemon_sprite": e.pokemon_sprite,
-            "is_captured": e.is_captured,
-            "capture_date": e.capture_date.isoformat() if e.capture_date else "",
-            "nickname": e.nickname or "",
-            "notes": e.notes or "",
-            "favorite": e.favorite,
-            "created_at": e.created_at.isoformat(),
-        })
+        writer.writerow(
+            {
+                "id": e.id,
+                "pokemon_id": e.pokemon_id,
+                "pokemon_name": e.pokemon_name,
+                "pokemon_sprite": e.pokemon_sprite,
+                "is_captured": e.is_captured,
+                "capture_date": e.capture_date.isoformat() if e.capture_date else "",
+                "nickname": e.nickname or "",
+                "notes": e.notes or "",
+                "favorite": e.favorite,
+                "created_at": e.created_at.isoformat(),
+            }
+        )
 
     csv_data = output.getvalue()
     output.close()
@@ -328,3 +336,57 @@ async def get_pokedex_stats(
         most_common_type=most_common_type,
         capture_streak_days=longest_streak,
     )
+
+
+# ---------- Versión 2 de la Pokédex ----------
+
+
+@router_v2.get(
+    "",
+    summary="List Pokedex (v2) con información extra del Pokémon",
+)
+async def list_pokedex_v2(
+    captured: Optional[bool] = Query(default=None),
+    favorite: Optional[bool] = Query(default=None),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Versión 2 del listado de Pokédex.
+    Devuelve las mismas entradas que v1 pero, además, incluye los
+    tipos del Pokémon obtenidos automáticamente de PokeAPI.
+
+    Es un ejemplo de cómo una nueva versión de la API puede enriquecer
+    la respuesta manteniendo la v1 para compatibilidad.
+    """
+    stmt = select(PokedexEntry).where(PokedexEntry.owner_id == current_user.id)
+
+    if captured is not None:
+        stmt = stmt.where(PokedexEntry.is_captured == captured)
+    if favorite is not None:
+        stmt = stmt.where(PokedexEntry.favorite == favorite)
+
+    entries = session.exec(stmt).all()
+
+    result = []
+
+    for e in entries:
+        pokemon_data = await pokeapi_service.get_pokemon(e.pokemon_id)
+        result.append(
+            {
+                "id": e.id,
+                "pokemon_id": e.pokemon_id,
+                "pokemon_name": e.pokemon_name,
+                "pokemon_sprite": e.pokemon_sprite,
+                "is_captured": e.is_captured,
+                "capture_date": e.capture_date.isoformat() if e.capture_date else None,
+                "nickname": e.nickname,
+                "notes": e.notes,
+                "favorite": e.favorite,
+                "created_at": e.created_at.isoformat(),
+                # Campo nuevo en v2:
+                "types": pokemon_data.get("types", []),
+            }
+        )
+
+    return result

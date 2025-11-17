@@ -17,4 +17,6 @@ dependencies = [
     "uvicorn>=0.37.0",
     "pydantic-settings>=2.0.3",
     "reportlab",
+    "pytest-cov>=7.0.0",
+    "pytest-asyncio>=1.3.0",
 ]
